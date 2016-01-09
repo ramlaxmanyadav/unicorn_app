@@ -19,8 +19,7 @@ set :deploy_to, "/home/#{user}/#{application}"
 #   branch       - Branch name to deploy. (needed by mina/git)
 
 # set :domain, 'foobar.com'
-set :deploy_to, '/home/deploy/'
-set :repository, 'git://...'
+set :repository, 'https://ramlaxmanyadav:RamLaxman9@github.com/ramlaxmanyadav/unicorn_app.git'
 set :branch, 'master'
 
 set :ruby_version, "#{File.readlines(File.join(__dir__, '..', '.ruby-version')).first.strip}"
@@ -125,8 +124,8 @@ task :deploy => :environment do
     invoke :'deploy:cleanup'
 
     to :launch do
-      queue "mkdir -p #{deploy_to}/#{current_path}/tmp/"
-      queue "touch #{deploy_to}/#{current_path}/tmp/restart.txt"
+      # queue "mkdir -p #{deploy_to}/#{current_path}/tmp/"
+      # queue "touch #{deploy_to}/#{current_path}/tmp/restart.txt"
     end
   end
 end
