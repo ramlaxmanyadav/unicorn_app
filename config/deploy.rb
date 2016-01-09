@@ -92,11 +92,10 @@ task :setup_prerequesties => :environment do
   queue! %[mkdir "#{deploy_to}"]
   queue! %[chown -R "#{user}" "#{deploy_to}"]
   # #setup nginx
-  # invoke :'nginx:install'
+  invoke :'nginx:install'
   # #setup nginx
   invoke :'nginx:setup'
   invoke :'nginx:restart'
-  invoke :'unicorn:setup'
 
 end
 
