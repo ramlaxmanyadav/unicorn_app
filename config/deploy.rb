@@ -2,9 +2,9 @@ require 'mina/bundler'
 require 'mina/rails'
 require 'mina/git'
 # require 'mina/rbenv'  # for rbenv support. (http://rbenv.org)
-# require 'mina/rvm'    # for rvm support. (http://rvm.io)
+require 'mina/rvm'    # for rvm support. (http://rvm.io)
 
-['base', 'nginx', 'check', 'unicorn'].each do |pkg|
+['base', 'nginx', 'check'].each do |pkg|
   require "#{File.join(__dir__, 'recipes', "#{pkg}")}"
 end
 
@@ -30,9 +30,7 @@ set :gemset, "#{File.readlines(File.join(__dir__, '..', '.ruby-gemset')).first.s
 # Manually create these paths in shared/ (eg: shared/config/database.yml) in your server.
 # They will be linked in the 'deploy:link_shared_paths' step.
 set :shared_paths, [
-                     'config/database.yml', 'log', 'config/secrets.yml',
-                     'config/unicorn.rb'
-                 ]
+                     'config/database.yml', 'log', 'config/secrets.yml']
 # Optional settings:
 #   set :user, 'foobar'    # Username in the server to SSH to.
 #   set :port, '30000'     # SSH port number.
@@ -43,7 +41,7 @@ set :shared_paths, [
 task :environment do
   set :rails_env, ENV['on'].to_sym unless ENV['on'].nil?
   # For those using RVM, use this to load an RVM version@gemset.
-  require "#{File.join(__dir__, 'deploy', "#{rails_env}_configuration_files", 'settings')}"
+  require "#{File.join(__dir__, 'deploy', "#{rails_env}_configurations_files", 'settings.rb')}"
   invoke :"rvm:use[ruby-#{ruby_version}@#{gemset}]"
 end
 
@@ -75,7 +73,7 @@ task :setup_prerequesties => :environment do
       'python-software-properties', 'libmysqlclient-dev', 'imagemagick', 'libmagickwand-dev', 'nodejs',
       'build-essential', 'zlib1g-dev', 'libssl-dev', 'libreadline-dev', 'libyaml-dev', 'libcurl4-openssl-dev', 'curl',
       'git-core', 'libreoffice', 'make', 'gcc', 'g++', 'pkg-config', 'libfuse-dev', 'libxml2-dev', 'zip', 'libtool',
-      'xvfb', 'mime-support', 'automake', 'memcached'
+      'xvfb', 'mime-support', 'automake', 'memcached', 'nginx'
   ].each do |package|
     puts "Installing #{package}"
     queue! %[sudo -A apt-get install -y #{package}]
@@ -94,10 +92,11 @@ task :setup_prerequesties => :environment do
   queue! %[mkdir "#{deploy_to}"]
   queue! %[chown -R "#{user}" "#{deploy_to}"]
   # #setup nginx
-  invoke :'nginx:install'
+  # invoke :'nginx:install'
   # #setup nginx
   invoke :'nginx:setup'
   invoke :'nginx:restart'
+  invoke :'unicorn:setup'
 
 end
 
@@ -124,8 +123,8 @@ task :deploy => :environment do
     invoke :'deploy:cleanup'
 
     to :launch do
-      # queue "mkdir -p #{deploy_to}/#{current_path}/tmp/"
-      # queue "touch #{deploy_to}/#{current_path}/tmp/restart.txt"
+      queue "mkdir -p #{deploy_to}/#{current_path}/tmp/"
+      queue "touch #{deploy_to}/#{current_path}/tmp/restart.txt"
     end
   end
 end

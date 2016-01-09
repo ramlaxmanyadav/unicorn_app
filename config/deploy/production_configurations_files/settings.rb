@@ -1,6 +1,6 @@
-set :branch, ENV['BRANCH'] || 'master-first_cut'
+set :branch, ENV['BRANCH'] || 'master'
 
-set :domain, ENV['DOMAIN'] || '54.67.54.67'
+set :domain, ENV['DOMAIN'] || '54.201.93.50'
 
 set :user, 'deploy'
 
